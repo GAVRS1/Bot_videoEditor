@@ -1,0 +1,4 @@
+-e .
+
+# Optional local automatic subtitles support:
+# faster-whisper>=1.0,<2.0
