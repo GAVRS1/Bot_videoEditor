@@ -58,7 +58,6 @@ run_project.bat
 
 `install_dependencies.bat` создаёт виртуальное окружение `.venv` и устанавливает зависимости из `requirements.txt`.
 `run_project.bat` активирует окружение и запускает бота через `python -m video_editor_bot.main`.
-Оба `.bat`-файла оставляют окно консоли открытым после завершения или ошибки, чтобы было видно вывод команд.
 
 ### Linux/macOS
 
