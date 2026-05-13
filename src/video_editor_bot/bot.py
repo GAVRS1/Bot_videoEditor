@@ -16,7 +16,7 @@ from video_editor_bot.storage import download_telegram_file, get_video_from_mess
 START_TEXT = """
 Привет! Отправь мне видео, и я сделаю вертикальный ролик 9:16 с размытым фоном.
 
-Если на сервере включён ASR_PROVIDER=faster-whisper, я также добавлю автосубтитры.
+Если в config.py включён ASR_PROVIDER = "faster-whisper", я также добавлю автосубтитры.
 """.strip()
 
 
