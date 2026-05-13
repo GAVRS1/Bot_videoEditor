@@ -11,7 +11,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 from video_editor_bot.config import Settings
 from video_editor_bot.services.asr import build_subtitle_generator
 from video_editor_bot.services.jobs import create_video_job
-from video_editor_bot.services.video_processor import FFmpegVideoProcessor, VideoPreset
+from video_editor_bot.services.video_processor import FFmpegNotFoundError, FFmpegVideoProcessor, VideoPreset
 from video_editor_bot.storage import download_telegram_file, get_video_from_message
 
 
@@ -25,6 +25,10 @@ START_TEXT = """
 
 
 FILE_TOO_BIG_TEXT = "file is too big"
+FFMPEG_NOT_FOUND_MESSAGE = (
+    "Не найден FFmpeg. Установи FFmpeg и добавь ffmpeg.exe в PATH, "
+    "затем перезапусти бота."
+)
 
 
 def build_application(settings: Settings) -> Application:
@@ -90,7 +94,11 @@ async def handle_video(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         if job.with_subtitles
         else None
     )
-    await asyncio.to_thread(processor.render_vertical, job.source_path, job.output_path, subtitle_path)
+    try:
+        await asyncio.to_thread(processor.render_vertical, job.source_path, job.output_path, subtitle_path)
+    except FFmpegNotFoundError:
+        await status.edit_text(FFMPEG_NOT_FOUND_MESSAGE)
+        return
 
     await status.edit_text("Готово! Загружаю результат…")
     with job.output_path.open("rb") as result:

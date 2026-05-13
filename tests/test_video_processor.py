@@ -1,6 +1,14 @@
 from pathlib import Path
 
-from video_editor_bot.services.video_processor import VideoPreset, build_vertical_ffmpeg_command, command_to_shell
+import pytest
+
+from video_editor_bot.services.video_processor import (
+    FFmpegNotFoundError,
+    VideoPreset,
+    build_vertical_ffmpeg_command,
+    command_to_shell,
+    ensure_ffmpeg_available,
+)
 
 
 def test_build_vertical_ffmpeg_command_without_subtitles() -> None:
@@ -30,3 +38,8 @@ def test_build_vertical_ffmpeg_command_with_subtitles() -> None:
     assert "scale=720:1280" in shell
     assert "subtitles=" in shell
     assert "subs.srt" in shell
+
+
+def test_ensure_ffmpeg_available_raises_for_missing_executable() -> None:
+    with pytest.raises(FFmpegNotFoundError, match="FFmpeg was not found"):
+        ensure_ffmpeg_available("definitely-not-ffmpeg")
