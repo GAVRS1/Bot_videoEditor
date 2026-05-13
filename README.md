@@ -97,11 +97,14 @@ video-editor-bot
 | --- | --- | --- |
 | `TELEGRAM_BOT_TOKEN` | `PASTE_TELEGRAM_BOT_TOKEN_HERE` | Токен Telegram-бота от `@BotFather`; обязательно замените перед запуском |
 | `WORKDIR` | `workdir` | Папка временных файлов |
-| `MAX_VIDEO_MB` | `50` | Лимит входного файла |
+| `MAX_VIDEO_MB` | `50` | Проектный лимит входного файла |
+| `TELEGRAM_DOWNLOAD_LIMIT_MB` | `20` | Лимит скачивания файла через Telegram Bot API; для облачного Bot API оставьте 20 MB, для локального Bot API server можно увеличить вместе с `MAX_VIDEO_MB` |
 | `OUTPUT_WIDTH` | `1080` | Ширина вертикального видео |
 | `OUTPUT_HEIGHT` | `1920` | Высота вертикального видео |
 | `ASR_PROVIDER` | `disabled` | `disabled` или `faster-whisper` |
 | `WHISPER_MODEL` | `base` | Модель faster-whisper |
+
+> ⚠️ Если пользователь отправит файл больше лимита скачивания Telegram Bot API, Telegram вернёт `File is too big`. Бот теперь заранее проверяет размер, если Telegram передал `file_size`, а также аккуратно показывает пользователю понятное сообщение, если ошибка пришла уже на этапе `get_file`.
 
 ## Масштабирование
 

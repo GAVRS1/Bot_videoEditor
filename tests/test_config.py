@@ -15,6 +15,7 @@ def test_load_settings_reads_config_constants(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(config, "TELEGRAM_BOT_TOKEN", "123456:telegram-token")
     monkeypatch.setattr(config, "WORKDIR", tmp_path)
     monkeypatch.setattr(config, "MAX_VIDEO_MB", 7)
+    monkeypatch.setattr(config, "TELEGRAM_DOWNLOAD_LIMIT_MB", 5)
     monkeypatch.setattr(config, "OUTPUT_WIDTH", 720)
     monkeypatch.setattr(config, "OUTPUT_HEIGHT", 1280)
     monkeypatch.setattr(config, "ASR_PROVIDER", "DISABLED")
@@ -26,6 +27,10 @@ def test_load_settings_reads_config_constants(monkeypatch, tmp_path) -> None:
     assert settings.workdir == tmp_path
     assert settings.max_video_mb == 7
     assert settings.max_video_bytes == 7 * 1024 * 1024
+    assert settings.telegram_download_limit_mb == 5
+    assert settings.telegram_download_limit_bytes == 5 * 1024 * 1024
+    assert settings.effective_max_video_mb == 5
+    assert settings.effective_max_video_bytes == 5 * 1024 * 1024
     assert settings.output_width == 720
     assert settings.output_height == 1280
     assert settings.asr_provider == "disabled"
