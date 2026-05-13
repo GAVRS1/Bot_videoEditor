@@ -21,6 +21,11 @@ WORKDIR = Path("workdir")
 # Maximum source video size accepted by the bot, in megabytes.
 MAX_VIDEO_MB = 50
 
+# Telegram cloud Bot API only lets bots download files up to 20 MB.
+# If you run your own local Bot API server, increase this value together with
+# MAX_VIDEO_MB. The bot uses the smaller of these two limits.
+TELEGRAM_DOWNLOAD_LIMIT_MB = 20
+
 # Output video size. 1080x1920 is a vertical 9:16 format.
 OUTPUT_WIDTH = 1080
 OUTPUT_HEIGHT = 1920
@@ -35,6 +40,7 @@ class Settings:
     telegram_bot_token: str
     workdir: Path = WORKDIR
     max_video_mb: int = MAX_VIDEO_MB
+    telegram_download_limit_mb: int = TELEGRAM_DOWNLOAD_LIMIT_MB
     output_width: int = OUTPUT_WIDTH
     output_height: int = OUTPUT_HEIGHT
     asr_provider: str = ASR_PROVIDER
@@ -43,6 +49,18 @@ class Settings:
     @property
     def max_video_bytes(self) -> int:
         return self.max_video_mb * 1024 * 1024
+
+    @property
+    def telegram_download_limit_bytes(self) -> int:
+        return self.telegram_download_limit_mb * 1024 * 1024
+
+    @property
+    def effective_max_video_mb(self) -> int:
+        return min(self.max_video_mb, self.telegram_download_limit_mb)
+
+    @property
+    def effective_max_video_bytes(self) -> int:
+        return self.effective_max_video_mb * 1024 * 1024
 
 
 def load_settings() -> Settings:
@@ -57,6 +75,7 @@ def load_settings() -> Settings:
         telegram_bot_token=token,
         workdir=Path(WORKDIR),
         max_video_mb=int(MAX_VIDEO_MB),
+        telegram_download_limit_mb=int(TELEGRAM_DOWNLOAD_LIMIT_MB),
         output_width=int(OUTPUT_WIDTH),
         output_height=int(OUTPUT_HEIGHT),
         asr_provider=ASR_PROVIDER.strip().lower(),
