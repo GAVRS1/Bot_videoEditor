@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import shlex
+import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +15,10 @@ class VideoPreset:
     audio_bitrate: str = "128k"
 
 
+class FFmpegNotFoundError(RuntimeError):
+    """Raised when the ffmpeg executable is not available."""
+
+
 @dataclass(frozen=True)
 class FFmpegVideoProcessor:
     preset: VideoPreset
@@ -21,6 +26,7 @@ class FFmpegVideoProcessor:
     def render_vertical(self, source: Path, destination: Path, subtitles: Path | None = None) -> Path:
         destination.parent.mkdir(parents=True, exist_ok=True)
         command = build_vertical_ffmpeg_command(source, destination, self.preset, subtitles)
+        ensure_ffmpeg_available(command[0])
         subprocess.run(command, check=True)
         return destination
 
@@ -69,6 +75,13 @@ def build_vertical_ffmpeg_command(
         "+faststart",
         str(destination),
     ]
+
+
+def ensure_ffmpeg_available(executable: str = "ffmpeg") -> None:
+    if shutil.which(executable) is None:
+        raise FFmpegNotFoundError(
+            "FFmpeg was not found. Install FFmpeg and add the ffmpeg executable to PATH."
+        )
 
 
 def command_to_shell(command: list[str]) -> str:

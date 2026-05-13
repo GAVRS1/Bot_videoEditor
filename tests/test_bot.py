@@ -1,6 +1,11 @@
 from telegram.error import BadRequest
 
-from video_editor_bot.bot import _guess_extension, _is_file_too_big_error, _video_too_large_message
+from video_editor_bot.bot import (
+    FFMPEG_NOT_FOUND_MESSAGE,
+    _guess_extension,
+    _is_file_too_big_error,
+    _video_too_large_message,
+)
 from video_editor_bot.config import Settings
 
 
@@ -39,3 +44,9 @@ def test_video_too_large_message_uses_project_limit_when_it_is_lower() -> None:
     )
 
     assert _video_too_large_message(settings) == "Видео слишком большое. Лимит: 10 MB."
+
+
+def test_ffmpeg_not_found_message_explains_install_and_restart() -> None:
+    assert "FFmpeg" in FFMPEG_NOT_FOUND_MESSAGE
+    assert "PATH" in FFMPEG_NOT_FOUND_MESSAGE
+    assert "перезапусти" in FFMPEG_NOT_FOUND_MESSAGE
