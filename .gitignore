@@ -3,7 +3,10 @@ __pycache__/
 .pytest_cache/
 .venv/
 .env
+*.log
+*.egg-info/
 /tmp/
+workdir/
 *.mp4
 *.mov
 *.mkv

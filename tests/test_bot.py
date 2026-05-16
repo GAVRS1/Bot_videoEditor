@@ -1,9 +1,12 @@
 from telegram.error import BadRequest
 
 from video_editor_bot.bot import (
+    EditState,
     FFMPEG_NOT_FOUND_MESSAGE,
     _guess_extension,
     _is_file_too_big_error,
+    _result_caption,
+    _selection_text,
     _video_too_large_message,
 )
 from video_editor_bot.config import Settings
@@ -50,3 +53,19 @@ def test_ffmpeg_not_found_message_explains_install_and_restart() -> None:
     assert "FFmpeg" in FFMPEG_NOT_FOUND_MESSAGE
     assert "PATH" in FFMPEG_NOT_FOUND_MESSAGE
     assert "перезапусти" in FFMPEG_NOT_FOUND_MESSAGE
+
+
+def test_selection_text_lists_multiple_enabled_actions() -> None:
+    state = EditState(subtitles=True, vertical=True, watermark=True, zoom=1.3)
+
+    text = _selection_text(state)
+
+    assert "вертикальное видео, зум 1.30" in text
+    assert "титры" in text
+    assert "водяной знак" in text
+
+
+def test_result_caption_lists_combined_actions() -> None:
+    state = EditState(subtitles=True, vertical=True, watermark=True)
+
+    assert _result_caption(state) == "Готово: вертикальное видео, титры, водяной знак"

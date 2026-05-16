@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -12,7 +13,8 @@ from pathlib import Path
 # configuration.
 
 # 1) Create a Telegram bot with @BotFather.
-# 2) Replace the placeholder below with the token from @BotFather.
+# 2) Set TELEGRAM_BOT_TOKEN in .env, as an environment variable, or replace
+#    the placeholder below with the token from @BotFather.
 TELEGRAM_BOT_TOKEN = "PASTE_TELEGRAM_BOT_TOKEN_HERE"
 
 # Temporary files are stored here while videos are being processed.
@@ -30,9 +32,15 @@ TELEGRAM_DOWNLOAD_LIMIT_MB = 20
 OUTPUT_WIDTH = 1080
 OUTPUT_HEIGHT = 1920
 
+# Image that is placed over the video in the watermark mode.
+WATERMARK_IMAGE_PATH = Path(r"D:/gavrs/иконка.png")
+
 # Subtitles: use "disabled" or "faster-whisper".
-ASR_PROVIDER = "disabled"
-WHISPER_MODEL = "base"
+ASR_PROVIDER = "faster-whisper"
+WHISPER_MODEL = "large-v3-turbo"
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 @dataclass(frozen=True)
@@ -43,6 +51,7 @@ class Settings:
     telegram_download_limit_mb: int = TELEGRAM_DOWNLOAD_LIMIT_MB
     output_width: int = OUTPUT_WIDTH
     output_height: int = OUTPUT_HEIGHT
+    watermark_image_path: Path = WATERMARK_IMAGE_PATH
     asr_provider: str = ASR_PROVIDER
     whisper_model: str = WHISPER_MODEL
 
@@ -64,11 +73,11 @@ class Settings:
 
 
 def load_settings() -> Settings:
-    token = TELEGRAM_BOT_TOKEN.strip()
+    token = _read_token().strip()
     if not token or token == "PASTE_TELEGRAM_BOT_TOKEN_HERE":
         raise RuntimeError(
-            "Telegram bot token is not configured. Open src/video_editor_bot/config.py "
-            "and set TELEGRAM_BOT_TOKEN."
+            "Telegram bot token is not configured. Set TELEGRAM_BOT_TOKEN in .env, "
+            "as an environment variable, or in src/video_editor_bot/config.py."
         )
 
     return Settings(
@@ -78,6 +87,31 @@ def load_settings() -> Settings:
         telegram_download_limit_mb=int(TELEGRAM_DOWNLOAD_LIMIT_MB),
         output_width=int(OUTPUT_WIDTH),
         output_height=int(OUTPUT_HEIGHT),
+        watermark_image_path=Path(WATERMARK_IMAGE_PATH),
         asr_provider=ASR_PROVIDER.strip().lower(),
         whisper_model=WHISPER_MODEL.strip(),
     )
+
+
+def _read_token() -> str:
+    return (
+        os.getenv("TELEGRAM_BOT_TOKEN")
+        or _read_dotenv_value(PROJECT_ROOT / ".env", "TELEGRAM_BOT_TOKEN")
+        or TELEGRAM_BOT_TOKEN
+    )
+
+
+def _read_dotenv_value(path: Path, key: str) -> str | None:
+    if not path.exists():
+        return None
+
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+
+        name, value = line.split("=", 1)
+        if name.strip() == key:
+            return value.strip().strip('"').strip("'")
+
+    return None
