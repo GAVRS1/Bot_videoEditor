@@ -2,11 +2,29 @@
 setlocal
 cd /d "%~dp0"
 
-echo Creating virtual environment in .venv ...
-python -m venv .venv
+echo Checking Python ...
+where python >nul 2>nul
 if errorlevel 1 (
-    echo Failed to create virtual environment. Make sure Python 3.11+ is installed and available as python.
+    echo Python was not found. Install Python 3.11+ and check "Add python.exe to PATH".
     goto error
+)
+
+python -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)" >nul 2>nul
+if errorlevel 1 (
+    echo Python 3.11 or newer is required.
+    python --version
+    goto error
+)
+
+if not exist ".venv\Scripts\activate.bat" (
+    echo Creating virtual environment in .venv ...
+    python -m venv .venv
+    if errorlevel 1 (
+        echo Failed to create virtual environment.
+        goto error
+    )
+) else (
+    echo Virtual environment already exists.
 )
 
 call ".venv\Scripts\activate.bat"
@@ -19,15 +37,21 @@ echo Installing project dependencies from requirements.txt ...
 python -m pip install -r requirements.txt
 if errorlevel 1 goto error
 
+echo Checking FFmpeg support ...
 where ffmpeg >nul 2>nul
 if errorlevel 1 (
     echo.
-    echo WARNING: ffmpeg was not found in PATH. Install FFmpeg and add it to PATH before processing videos.
+    echo FFmpeg was not found in PATH, but the bot can use the bundled imageio-ffmpeg package.
+    echo If video processing fails on this PC, install FFmpeg and add it to PATH.
+    python -c "import imageio_ffmpeg; print('Bundled FFmpeg:', imageio_ffmpeg.get_ffmpeg_exe())"
+    if errorlevel 1 goto error
+) else (
+    ffmpeg -version | findstr /i "ffmpeg version"
 )
 
 echo.
 echo Dependencies are installed.
-echo Next step: open src\video_editor_bot\config.py, set TELEGRAM_BOT_TOKEN, then run run_project.bat.
+echo Next step: run run_app.bat
 goto end
 
 :error

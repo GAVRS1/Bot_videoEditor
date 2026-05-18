@@ -1,4 +1,4 @@
-"""Telegram video editor bot package."""
+"""Desktop video editor package."""
 
 __all__ = ["__version__"]
 

@@ -1,7 +1,7 @@
 [project]
 name = "bot-video-editor"
 version = "0.1.0"
-description = "Telegram bot that turns regular clips into vertical videos with blurred background and optional subtitles."
+description = "Desktop video editor for preparing vertical short-form clips with subtitles and overlays."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -9,7 +9,7 @@ authors = [{ name = "0xgavrs" }]
 dependencies = [
   "faster-whisper>=1.0,<2.0",
   "imageio-ffmpeg>=0.5,<1.0",
-  "python-telegram-bot>=21.0,<22.0",
+  "PySide6>=6.7,<7.0",
 ]
 
 [project.optional-dependencies]
@@ -17,7 +17,7 @@ asr = ["faster-whisper>=1.0,<2.0"]
 dev = ["pytest>=8.0,<9.0"]
 
 [project.scripts]
-video-editor-bot = "video_editor_bot.main:main"
+video-editor = "video_editor_bot.gui:main"
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
